@@ -38,6 +38,13 @@ variable "azure_vnet_cidr" {
   default     = "10.1.0.0/16"
 }
 
+variable "azure_subnet_cidr" {
+  description = "Azure subNet CIDR"
+  type        = string
+  default     = "10.1.1.0/24"
+}
+
+
 variable "environment" {
   description = "환경명"
   type        = string

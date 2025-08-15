@@ -2,7 +2,7 @@ variable "location" { type = string }
 variable "vnet_cidr" { type = string }
 variable "environment" { type = string }
 variable "project_name" { type = string }
-
+variable "subnet_cidr"  { type = string }
 # 리소스 그룹
 resource "azurerm_resource_group" "main" {
   name     = "${var.project_name}-${var.environment}-rg"
@@ -32,7 +32,7 @@ resource "azurerm_subnet" "main" {
   name                 = "${var.project_name}-${var.environment}-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = [var.vnet_cidr]
+  address_prefixes     = [var.subnet_cidr]
 }
 
 # NSG (Network Security Group)
