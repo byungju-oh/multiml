@@ -32,3 +32,5 @@ terraform.rc
 # IDE/editor folders
 .vscode/
 .idea/
+
+.terraform.lock.hcl
