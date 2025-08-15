@@ -3,7 +3,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 4.84"
+      version = "~> 5.0"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -43,6 +43,7 @@ module "azure_vnet" {
   environment   = var.environment
   project_name  = var.project_name
   subnet_cidr   = var.azure_subnet_cidr
+  aks_subnet_cidr = var.azure_aks_subnet_cidr # AKS 서브넷 추가
 }
 
 
@@ -97,4 +98,44 @@ resource "null_resource" "update_azure_connection" {
   triggers = {
     gcp_gateway_ip = module.gcp_vpn.gateway_ip
   }
+}
+
+# 3단계: GKE 클러스터 (VPN 완료 후 추가)
+module "gke" {
+  source = "../../modules/gcp/gke"
+  
+  project_id     = var.project_id
+  region         = var.gcp_region
+  zone           = var.gcp_zone
+  vpc_name       = module.gcp_vpc.vpc_name
+  subnet_name    = module.gcp_vpc.subnet_name
+  environment    = var.environment
+  project_name   = var.project_name
+  
+  # 클러스터 설정
+  node_count         = 2
+  machine_type       = "e2-standard-2"
+  disk_size_gb       = 50
+  preemptible        = true
+  
+  depends_on = [module.gcp_vpn]
+}
+
+# 3단계: AKS 클러스터 (수정)
+module "aks" {
+  source = "../../modules/azure/aks"
+  
+  resource_group_name = module.azure_vnet.resource_group_name
+  location           = var.azure_location
+  vnet_name          = module.azure_vnet.vnet_name
+  subnet_name        = module.azure_vnet.aks_subnet_name  # AKS 전용 서브넷 사용
+  environment        = var.environment
+  project_name       = var.project_name
+  
+  # 클러스터 설정
+  node_count         = 2
+  vm_size           = "Standard_B2s"
+  disk_size_gb      = 50
+  
+  depends_on = [module.azure_vpn]
 }

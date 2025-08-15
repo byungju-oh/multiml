@@ -44,6 +44,12 @@ variable "azure_subnet_cidr" {
   default     = "10.1.1.0/24"
 }
 
+variable "azure_aks_subnet_cidr" {
+  description = "Azure AKS 서브넷 CIDR"
+  type        = string
+  default     = "10.1.2.0/24"
+}
+
 
 variable "environment" {
   description = "환경명"
